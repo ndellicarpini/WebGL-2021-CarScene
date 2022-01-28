@@ -1,0 +1,38 @@
+/* Nicholas Delli Carpini */
+
+body {
+    background-color: black;
+}
+
+#topbar {
+    font-family: Arial, serif;
+    color: white;
+    
+    max-height: 85px;
+    min-height: 85px;
+    min-width: 100%;
+    border-bottom: solid;
+    border-bottom-color: crimson;
+    margin-bottom: 8px;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#topRight {
+    display: flex;
+    align-items: center;
+}
+
+#loadText {
+    margin-top: 8px;
+    margin-bottom: 0;
+    margin-left: 6.4em;
+
+    font-size: 1.2em;
+}
+
+#content {
+    display: block;
+}

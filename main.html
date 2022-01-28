@@ -1,0 +1,163 @@
+<!-- Nicholas Delli Carpini -->
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Final Project</title>
+
+        <!-- STYLESHEET -->
+        <link rel="stylesheet" href="style.css">
+
+        <!-- VERTEX SHADER -->
+        <script id="vshader" type="x-shader/x-vertex">
+
+        precision highp int;
+        precision mediump float;
+
+        uniform int lightingFlag;
+        uniform int textureFlag;
+
+        uniform int reflectFlag;
+        uniform int refractFlag;
+
+        uniform mat4 projectionM;
+        uniform mat4 viewM;
+
+        attribute vec4 pointCoord;
+        attribute vec4 normalCoord;
+        attribute vec2 texCoord;
+
+        uniform vec4 lightingCoord;
+
+        uniform vec4 ambientV;
+        uniform vec4 diffuseV;
+        uniform vec4 specularV;
+        uniform float shininess;
+
+        varying vec2 fTexCoord;
+        varying vec3 surfaceLight;
+        varying vec3 refPos, L, N, V;
+
+        void main() {
+            refPos = (projectionM * pointCoord).xyz;
+
+            vec3 pos = (viewM * pointCoord).xyz;
+
+            L = normalize(lightingCoord.xyz - pos);
+            N = normalize(viewM * normalCoord).xyz;
+            V = normalize(-pos);
+
+            if (textureFlag > -1) {
+                fTexCoord = texCoord;
+            }
+
+            gl_Position = projectionM * viewM * pointCoord;
+        }
+        </script>
+
+        <!-- FRAGMENT SHADER -->
+        <script id="fshader" type="x-shader/x-fragment">
+
+        precision highp int;
+        precision mediump float;
+
+        uniform int lightingFlag;
+        uniform int textureFlag;
+
+        uniform int reflectFlag;
+        uniform int refractFlag;
+
+        uniform sampler2D tex0;
+        uniform sampler2D tex1;
+        uniform sampler2D tex2;
+        uniform sampler2D tex3;
+        uniform sampler2D tex4;
+        uniform sampler2D tex5;
+        uniform sampler2D tex6;
+
+        uniform samplerCube texCube;
+
+        uniform vec4 ambientV;
+        uniform vec4 diffuseV;
+        uniform vec4 specularV;
+        uniform float shininess;
+
+        varying vec2 fTexCoord;
+        varying vec3 refPos, L, N, V;
+
+        void main() {
+            vec4 finalColor;
+
+            if (lightingFlag == 1) {
+                vec4 diffuse = diffuseV * dot(L, N);
+                vec3 specularR = (2.0 * dot(L, N) * N) - L;
+                vec4 specular = specularV * pow(max(dot(specularR, V), 0.0), shininess);
+
+                finalColor = diffuse + specular + ambientV;
+                finalColor.a = 1.0;
+
+                if (reflectFlag == 1) {
+                    finalColor = (finalColor * vec4(5.0, 5.0, 5.0, 1.0)) * textureCube(texCube, reflect(refPos, N));
+                }
+                else if (refractFlag == 1)  {
+                    finalColor = textureCube(texCube, refract(refPos, N, 0.95));
+                }
+            }
+            else {
+                finalColor = diffuseV * ambientV;
+            }
+
+            if (textureFlag > -1) {
+                if (textureFlag == 0) {
+                    finalColor = texture2D(tex0, fTexCoord) * finalColor;
+                }
+                if (textureFlag == 1) {
+                    finalColor = texture2D(tex1, fTexCoord);
+                }
+                else if (textureFlag == 2) {
+                    finalColor = texture2D(tex2, fTexCoord);
+                }
+                else if (textureFlag == 3) {
+                    finalColor = texture2D(tex3, fTexCoord);
+                }
+                else if (textureFlag == 4) {
+                    finalColor = texture2D(tex4, fTexCoord);
+                }
+                else if (textureFlag == 5) {
+                    finalColor = texture2D(tex5, fTexCoord);
+                }
+                else if (textureFlag == 6) {
+                    finalColor = texture2D(tex6, fTexCoord);
+                }
+            }
+
+            gl_FragColor = finalColor;
+        }
+        </script>
+
+        <!-- EXAMPLE LIBRARIES -->
+        <script src="lib/webgl-utils.js"></script>
+        <script src="lib/initShaders.js"></script>
+        <script src="lib/MV.js"></script>
+
+        <!-- JAVASCRIPT -->
+        <script src="main.js"></script>
+
+    </head>
+    <body onload="main()">
+        <div id="topbar">
+            <div id="topLeft">
+                <h1 id="title">Final Project</h1>
+            </div>
+            <div id="topRight">
+                <h2 id="loadText">Loading...</h2>
+            </div>
+        </div>
+        <div id="content">
+            <canvas id="webgl">
+                If you can read this, its too late
+            </canvas>
+        </div>
+    </body>
+</html>
